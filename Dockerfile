@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 # Install dependencies
 COPY package*.json ./
 RUN npm install --production
+RUN npm install --build-from-source sqlite3
 
 # Bundle app source
 COPY . .
