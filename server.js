@@ -185,7 +185,7 @@ app.get('/', (req, res) => {
 });
 
 
-error handler
+// error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'internal_server_error' });
