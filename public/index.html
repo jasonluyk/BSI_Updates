@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Document Index</title>
+    <title>BSI Brochures</title>
+    <link rel="icon" href="bsilogo.png" type="image/png">
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>-->
     <style>
         * {
@@ -148,17 +149,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📄 PDF Document Library</h1>
-            <p>Access your documents anytime, anywhere</p>
-        </div>
-        
-        <div class="qr-section">
-            <h2>Scan to Access</h2>
-            <div id="qrcode"></div>
+            <h1>📄 BSI Brochure Library</h1>
+            <p>All Brumley South has to Offer in one Place!</p>
         </div>
         
         <div class="pdf-list">
-            <h2>Available Documents</h2>
+            <h2>Available Brochures</h2>
             
             <a href="/pdfs/GPIO BSI 238740 Rev 8 21 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
@@ -354,19 +350,6 @@
         </div>
     </div>
     
-    <script>
-        // Generate QR code for current page URL
-        const currentUrl = window.location.href;
-        new QRCode(document.getElementById("qrcode"), {
-            text: currentUrl,
-            width: 200,
-            height: 200,
-            colorDark: "#667eea",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        
-
-    </script>
+    
 </body>
 </html>
