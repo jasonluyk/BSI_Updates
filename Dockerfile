@@ -1,19 +1,23 @@
 FROM node:20-alpine
 
-# Install build tools for sqlite3 compilation
-RUN apk add --no-cache python3 make g++ bash
+# Install build tools
+RUN apk add --no-cache \
+    python3 \
+    py3-distutils \
+    make \
+    g++ \
+    bash \
+    git
 
 WORKDIR /usr/src/app
 
-# Copy package files and install dependencies
 COPY package*.json ./
+
+# Force sqlite3 to build for the correct architecture
 RUN npm install --build-from-source sqlite3
 
-# Copy all other files
 COPY . .
 
-# Expose port
 EXPOSE 3000
 
-# Run app
 CMD ["npm", "start"]
