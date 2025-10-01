@@ -1,18 +1,19 @@
 FROM node:20-alpine
 
-# Create app directory
+# Install build tools for sqlite3 compilation
+RUN apk add --no-cache python3 make g++ bash
+
 WORKDIR /usr/src/app
 
-# Install dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install --production
 RUN npm install --build-from-source sqlite3
 
-# Bundle app source
+# Copy all other files
 COPY . .
 
 # Expose port
 EXPOSE 3000
 
-# Start app
+# Run app
 CMD ["npm", "start"]
