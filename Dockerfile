@@ -1,20 +1,12 @@
-FROM node:20-alpine
-
-# Install build tools
-RUN apk add --no-cache \
-    python3 \
-    py3-distutils \
-    make \
-    g++ \
-    bash \
-    git
+FROM node:20-slim
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# Force sqlite3 to build for the correct architecture
-RUN npm install --build-from-source sqlite3
+RUN apt-get update && apt-get install -y python3 make g++ git \
+    && npm install --build-from-source sqlite3 \
+    && apt-get clean
 
 COPY . .
 
