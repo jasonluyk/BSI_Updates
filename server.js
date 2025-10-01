@@ -20,9 +20,7 @@ app.use(morgan('tiny'));
 
 // Serve static PDFs from /pdfs
 const pdfsFolder = path.join(__dirname, 'pdfs');
-app.use('/pdfs', express.static(pdfsFolder, {
-  // setCacheControl: true by default; adjust options if needed
-}));
+app.use('/pdfs', express.static(pdfsFolder));
 
 // --- Database setup (sqlite3 with promisified helpers) ---
 const db = new sqlite3.Database(DB_PATH);
@@ -31,9 +29,6 @@ const dbGet = promisify(db.get.bind(db));
 const dbAll = promisify(db.all.bind(db));
 
 async function initDb() {
-  // Create feedback table if it doesn't exist
-  // id: integer primary key autoincrement
-  // name, email optional, message required, rating optional integer 1-5, created_at timestamp
   const createTableSql = `
     CREATE TABLE IF NOT EXISTS feedback (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,7 +50,6 @@ initDb().catch(err => {
 
 // --- Helper validation ---
 function validateFeedback(payload) {
-  // payload: { name, email, message, rating, metadata }
   const errors = [];
   if (!payload || typeof payload !== 'object') {
     errors.push('Invalid payload');
@@ -97,13 +91,11 @@ app.post('/api/feedback', async (req, res) => {
     const email = payload.email ? String(payload.email).trim() : null;
     const message = String(payload.message).trim();
     const rating = payload.rating !== undefined ? Number(payload.rating) : null;
-    // metadata can hold any additional JSON the client wants to attach (stringified)
     const metadata = payload.metadata ? JSON.stringify(payload.metadata) : null;
 
     const insertSql = `INSERT INTO feedback (name, email, message, rating, metadata) VALUES (?, ?, ?, ?, ?)`;
-    const result = await dbRun(insertSql, [name, email, message, rating, metadata]);
+    await dbRun(insertSql, [name, email, message, rating, metadata]);
 
-    // sqlite3's run doesn't return lastID when promisified, so fetch last row via "last_insert_rowid()"
     const row = await dbGet('SELECT last_insert_rowid() AS id');
     const insertedId = row ? row.id : null;
 
@@ -116,7 +108,7 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
-// List feedback (optionally ?limit= & ?offset=)
+// List feedback
 app.get('/api/feedback', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '100', 10) || 100, 1000);
@@ -130,10 +122,9 @@ app.get('/api/feedback', async (req, res) => {
       [limit, offset]
     );
 
-    // try to parse metadata JSON for each row
     const parsed = rows.map(r => {
       let meta = null;
-      try { meta = r.metadata ? JSON.parse(r.metadata) : null; } catch (e) { meta = r.metadata; }
+      try { meta = r.metadata ? JSON.parse(r.metadata) : null; } catch { meta = r.metadata; }
       return { ...r, metadata: meta };
     });
 
@@ -144,7 +135,7 @@ app.get('/api/feedback', async (req, res) => {
   }
 });
 
-// Get single feedback by id
+// Get single feedback
 app.get('/api/feedback/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -157,7 +148,7 @@ app.get('/api/feedback/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'not_found' });
 
     let meta = null;
-    try { meta = row.metadata ? JSON.parse(row.metadata) : null; } catch (e) { meta = row.metadata; }
+    try { meta = row.metadata ? JSON.parse(row.metadata) : null; } catch { meta = row.metadata; }
     row.metadata = meta;
 
     res.json({ feedback: row });
@@ -167,20 +158,13 @@ app.get('/api/feedback/:id', async (req, res) => {
   }
 });
 
-// Simple delete endpoint (optional) - remove by id
+// Delete feedback (optional)
 app.delete('/api/feedback/:id', async (req, res) => {
   try {
-    // NOTE: in production you should protect this route (auth)
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
 
-    const info = await dbRun('DELETE FROM feedback WHERE id = ?', [id]);
-    // sqlite's run returns this but promisified may not; check if row exists:
-    const row = await dbGet('SELECT COUNT(1) AS cnt FROM feedback WHERE id = ?', [id]);
-    if (row && row.cnt === 0) {
-      // was deleted (or didn't exist)
-      return res.json({ success: true });
-    }
+    await dbRun('DELETE FROM feedback WHERE id = ?', [id]);
     res.json({ success: true });
   } catch (err) {
     console.error('DELETE /api/feedback/:id error:', err);
@@ -188,17 +172,17 @@ app.delete('/api/feedback/:id', async (req, res) => {
   }
 });
 
-// Fallback 404 for unknown API routes
-app.use('/api/*', (req, res) => {
+// ✅ Fixed: catch-all for unknown API routes
+app.use('/api', (req, res) => {
   res.status(404).json({ error: 'not_found' });
 });
 
-// Serve a simple index for root that explains routes (optional)
+// Root info
 app.get('/', (req, res) => {
   res.type('text/plain').send(
 `Feedback API
-- POST /api/feedback    { name?, email?, message*, rating? (1-5), metadata? }
-- GET  /api/feedback    list recent feedback
+- POST /api/feedback
+- GET  /api/feedback
 - GET  /api/feedback/:id
 - Static PDFs served at /pdfs/<filename>.pdf
 `
@@ -214,5 +198,5 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
-  console.log(`PDFs served from: ${pdfsFolder} -> http://localhost:${PORT}/pdfs/<file.pdf>`);
+  console.log(`PDFs served from: ${pdfsFolder}`);
 });
