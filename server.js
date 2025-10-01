@@ -18,6 +18,8 @@ app.use(cors()); // adjust origin in production
 app.use(express.json({ limit: '10kb' })); // parse JSON bodies
 app.use(morgan('tiny'));
 
+
+app.use(express.static(path.join(__dirname, 'public')));
 // Serve static PDFs from /pdfs
 const pdfsFolder = path.join(__dirname, 'pdfs');
 app.use('/pdfs', express.static(pdfsFolder));
@@ -179,17 +181,11 @@ app.use('/api', (req, res) => {
 
 // Root info
 app.get('/', (req, res) => {
-  res.type('text/plain').send(
-`Feedback API
-- POST /api/feedback
-- GET  /api/feedback
-- GET  /api/feedback/:id
-- Static PDFs served at /pdfs/<filename>.pdf
-`
-  );
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handler
+
+error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'internal_server_error' });
