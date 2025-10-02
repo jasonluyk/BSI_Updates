@@ -622,26 +622,22 @@
     </div>
     
     <script>
-        // Rating buttons functionality
-        const ratingBtns = document.querySelectorAll('.rating-btn');
-        const ratingInput = document.getElementById('rating');
-        
-        ratingBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                ratingBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                ratingInput.value = this.getAttribute('data-rating');
-            });
+document.addEventListener("DOMContentLoaded", () => {
+    // Rating buttons functionality
+    const ratingBtns = document.querySelectorAll('.rating-btn');
+    const ratingInput = document.getElementById('rating');
+
+    ratingBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            ratingBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            ratingInput.value = this.getAttribute('data-rating');
         });
+    });
 
-        // Form submission
-
-
-
-
-       document.addEventListener("DOMContentLoaded", () => {
+    // Form submission
     const feedbackForm = document.getElementById("feedbackForm");
-    feedbackForm.addEventListener("submit", async function(e) {
+    feedbackForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const formData = {
@@ -671,7 +667,7 @@
         }
     });
 });
+</script>
 
-    </script>
 </body>
 </html>
