@@ -6,6 +6,7 @@ const { promisify } = require('util');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
+const fetch = require("node-fetch");
 
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'feedback.db');
@@ -118,30 +119,26 @@ app.post('/api/feedback', async (req, res) => {
 
 
 // List feedback
-app.get('/api/feedback', async (req, res) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit || '100', 10) || 100, 1000);
-    const offset = Math.max(parseInt(req.query.offset || '0', 10) || 0, 0);
+app.post("/api/feedback", async (req, res) => {
+    const { message } = req.body;
 
-    const rows = await dbAll(
-      `SELECT id, name, email, message, rating, metadata, created_at
-       FROM feedback
-       ORDER BY created_at DESC, id DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+    if (!message) return res.status(400).json({ error: "Message required" });
 
-    const parsed = rows.map(r => {
-      let meta = null;
-      try { meta = r.metadata ? JSON.parse(r.metadata) : null; } catch { meta = r.metadata; }
-      return { ...r, metadata: meta };
-    });
+    try {
+        const response = await fetch(`http://${process.env.DROPLET_IP}:3001/feedback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        });
 
-    res.json({ count: parsed.length, feedback: parsed });
-  } catch (err) {
-    console.error('GET /api/feedback error:', err);
-    res.status(500).json({ error: 'internal_server_error' });
-  }
+        if (!response.ok) throw new Error("Failed to store feedback");
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Get single feedback
