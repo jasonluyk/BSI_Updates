@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const fetch = require("node-fetch");
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'feedback.db');
@@ -19,13 +20,12 @@ app.use(cors()); // adjust origin in production
 app.use(express.json({ limit: '10kb' })); // parse JSON bodies
 app.use(morgan('tiny'));
 
-
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
-// Serve static PDFs from /pdfs
 const pdfsFolder = path.join(__dirname, 'pdfs');
 app.use('/pdfs', express.static(pdfsFolder));
 
-// --- Database setup (sqlite3 with promisified helpers) ---
+// --- Database setup ---
 const db = new sqlite3.Database(DB_PATH);
 const dbRun = promisify(db.run.bind(db));
 const dbGet = promisify(db.get.bind(db));
@@ -85,7 +85,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Submit feedback
+// POST /api/feedback — stores locally and optionally sends to Droplet
 app.post('/api/feedback', async (req, res) => {
   try {
     const payload = req.body;
@@ -94,11 +94,12 @@ app.post('/api/feedback', async (req, res) => {
 
     const name = payload.name ? String(payload.name).trim() : null;
     const email = payload.email ? String(payload.email).trim() : null;
-    const company = payload.company ? String(payload.company).trim() : null;  // ✅ capture company
+    const company = payload.company ? String(payload.company).trim() : null;
     const message = String(payload.message).trim();
     const rating = payload.rating !== undefined ? Number(payload.rating) : null;
     const metadata = payload.metadata ? JSON.stringify(payload.metadata) : null;
 
+    // Store in local DB
     const insertSql = `
       INSERT INTO feedback (name, email, company, message, rating, metadata)
       VALUES (?, ?, ?, ?, ?, ?)
@@ -107,41 +108,33 @@ app.post('/api/feedback', async (req, res) => {
 
     const row = await dbGet('SELECT last_insert_rowid() AS id');
     const insertedId = row ? row.id : null;
-
     const feedback = await dbGet('SELECT * FROM feedback WHERE id = ?', insertedId);
 
-    res.status(201).json({ success: true, feedback });
+    // Send to Droplet API if configured
+    if (process.env.DROPLET_IP) {
+      try {
+        const dropletRes = await fetch(`http://${process.env.DROPLET_IP}:3001/feedback`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, company, message, rating })
+        });
+
+        if (!dropletRes.ok) {
+          console.warn("Droplet API failed:", dropletRes.status);
+        }
+      } catch (err) {
+        console.error("Droplet API error:", err.message);
+      }
+    }
+
+    return res.status(201).json({ success: true, feedback });
   } catch (err) {
     console.error('POST /api/feedback error:', err);
     res.status(500).json({ error: 'internal_server_error' });
   }
 });
 
-
-// List feedback
-app.post("/api/feedback", async (req, res) => {
-    const { message } = req.body;
-
-    if (!message) return res.status(400).json({ error: "Message required" });
-
-    try {
-        const response = await fetch(`http://${process.env.DROPLET_IP}:3001/feedback`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
-        });
-
-        if (!response.ok) throw new Error("Failed to store feedback");
-
-        const data = await response.json();
-        res.json(data);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get single feedback
+// GET single feedback
 app.get('/api/feedback/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -153,10 +146,7 @@ app.get('/api/feedback/:id', async (req, res) => {
     );
     if (!row) return res.status(404).json({ error: 'not_found' });
 
-    let meta = null;
-    try { meta = row.metadata ? JSON.parse(row.metadata) : null; } catch { meta = row.metadata; }
-    row.metadata = meta;
-
+    row.metadata = row.metadata ? JSON.parse(row.metadata) : null;
     res.json({ feedback: row });
   } catch (err) {
     console.error('GET /api/feedback/:id error:', err);
@@ -164,21 +154,7 @@ app.get('/api/feedback/:id', async (req, res) => {
   }
 });
 
-// Delete feedback (optional)
-app.delete('/api/feedback/:id', async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
-
-    await dbRun('DELETE FROM feedback WHERE id = ?', [id]);
-    res.json({ success: true });
-  } catch (err) {
-    console.error('DELETE /api/feedback/:id error:', err);
-    res.status(500).json({ error: 'internal_server_error' });
-  }
-});
-
-// Admin: get all feedback (same as GET /api/feedback but at /api/admin/feedback)
+// Admin: get all feedback
 app.get('/api/admin/feedback', async (req, res) => {
   try {
     const rows = await dbAll(
@@ -209,20 +185,17 @@ app.delete('/api/admin/feedback/:id', async (req, res) => {
   }
 });
 
-
-
-// ✅ Fixed: catch-all for unknown API routes
+// Catch-all for unknown API routes
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'not_found' });
 });
 
-// Root info
+// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-
-// error handler
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'internal_server_error' });
