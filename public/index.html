@@ -68,7 +68,27 @@
             margin: 15px auto 0;
             border-radius: 2px;
         }
-        
+        .pdf-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 equal columns */
+            gap: 10px; /* spacing between items */
+            max-width: 600px; /* optional, keeps it from being too wide */
+            margin: auto;
+        }
+
+            .pdf-grid a {
+            display: block;
+            padding: 8px;
+            background: #f2f2f2;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #333;
+        }
+
+            .pdf-grid a:hover {
+            background: #ddd;
+        }
+
         .pdf-list {
             padding: 40px;
             background: #ffffff;
@@ -367,7 +387,7 @@
             <p>All Brumley South has to Offer in One Place!</p>
             <div class="accent-line"></div>
         </div>
-        
+        <div class="pdf-grid">
         <div class="pdf-list">
             <h2>Available Brochures</h2>
             
@@ -532,6 +552,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
+        </div>
         </div>
     </div>
 
