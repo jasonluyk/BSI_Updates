@@ -174,6 +174,39 @@ app.delete('/api/feedback/:id', async (req, res) => {
   }
 });
 
+// Admin: get all feedback (same as GET /api/feedback but at /api/admin/feedback)
+app.get('/api/admin/feedback', async (req, res) => {
+  try {
+    const rows = await dbAll(
+      `SELECT id, name, email, message, rating, metadata, created_at
+       FROM feedback
+       ORDER BY created_at DESC, id DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('GET /api/admin/feedback error:', err);
+    res.status(500).json({ error: 'internal_server_error' });
+  }
+});
+
+// Admin: delete feedback
+app.delete('/api/admin/feedback/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'invalid_id' });
+    }
+
+    await dbRun('DELETE FROM feedback WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /api/admin/feedback/:id error:', err);
+    res.status(500).json({ error: 'internal_server_error' });
+  }
+});
+
+
+
 // ✅ Fixed: catch-all for unknown API routes
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'not_found' });
