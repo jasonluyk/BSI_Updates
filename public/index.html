@@ -573,99 +573,120 @@
     </div>
 
     <!-- Feedback Section -->
-    <div class="feedback-section">
-        <h2>💬 Send Us Your Feedback</h2>
-        <p>We'd love to hear from you! Let us know what you think.</p>
-        
-        <div id="alertContainer"></div>
-        
-        <form id="feedbackForm" novalidate>
-            <div class="form-group">
-                <label for="name">Name (Optional)</label>
-                <input type="text" id="name" name="name" placeholder="Your name">
+<div class="feedback-section">
+    <h2>💬 Send Us Your Feedback</h2>
+    <p>We'd love to hear from you! Let us know what you think.</p>
+
+    <div id="alertContainer"></div>
+
+    <form id="feedbackForm" novalidate>
+        <div class="form-group">
+            <label for="name">Name (Optional)</label>
+            <input type="text" id="name" name="name" placeholder="Your name">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email (Optional)</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com">
+        </div>
+
+        <div class="form-group">
+            <label for="company">Company (Optional)</label>
+            <input type="text" id="company" name="company" placeholder="Your company">
+        </div>
+
+        <div class="form-group">
+            <label for="rating">How would you rate your experience? (Optional)</label>
+            <div class="rating-group">
+                <button type="button" class="rating-btn" data-rating="1">1</button>
+                <button type="button" class="rating-btn" data-rating="2">2</button>
+                <button type="button" class="rating-btn" data-rating="3">3</button>
+                <button type="button" class="rating-btn" data-rating="4">4</button>
+                <button type="button" class="rating-btn" data-rating="5">5</button>
             </div>
-            
-            <div class="form-group">
-                <label for="email">Email (Optional)</label>
-                <input type="email" id="email" name="email" placeholder="your@email.com">
-            </div>
-            
-            <div class="form-group">
-                <label for="company">Company (Optional)</label>
-                <input type="text" id="company" name="company" placeholder="Your company">
-            </div>
-            
-            <div class="form-group">
-                <label for="rating">How would you rate your experience? (Optional)</label>
-                <div class="rating-group">
-                    <button type="button" class="rating-btn" data-rating="1">1</button>
-                    <button type="button" class="rating-btn" data-rating="2">2</button>
-                    <button type="button" class="rating-btn" data-rating="3">3</button>
-                    <button type="button" class="rating-btn" data-rating="4">4</button>
-                    <button type="button" class="rating-btn" data-rating="5">5</button>
-                </div>
-                <input type="hidden" id="rating" name="rating" value="">
-            </div>
-            
-            <div class="form-group">
-                <label for="message">Your Feedback *</label>
-                <textarea id="message" name="message" placeholder="Tell us what you think..." required></textarea>
-            </div>
-            
-            <button type="submit" class="submit-btn">Submit Feedback</button>
-        </form>
+            <input type="hidden" id="rating" name="rating" value="">
+        </div>
 
-    </div>
+        <div class="form-group">
+            <label for="message">Your Feedback *</label>
+            <textarea id="message" name="message" placeholder="Tell us what you think..." required></textarea>
+        </div>
 
-    <div class="footer">
-        <p>© 2025 Brumley South, Inc. All rights reserved.</p>
-    </div>
-    
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const ratingBtns = document.querySelectorAll('.rating-btn');
-        const ratingInput = document.getElementById('rating');
-        const feedbackForm = document.getElementById('feedbackForm');
+        <button type="submit" class="submit-btn">Submit Feedback</button>
+    </form>
+</div>
 
-        ratingBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                ratingBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                ratingInput.value = this.getAttribute('data-rating');
-            });
-        });
+<div class="footer">
+    <p>© 2025 Brumley South, Inc. All rights reserved.</p>
+</div>
 
-        feedbackForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
+<!-- SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const feedbackForm = document.getElementById("feedbackForm");
+    const ratingBtns = document.querySelectorAll('.rating-btn');
+    const ratingInput = document.getElementById("rating");
 
-            const formData = {
-                name: this.name.value,
-                email: this.email.value,
-                company: this.company.value,
-                message: this.message.value,
-                rating: this.rating.value || null
-            };
+    console.log("Initializing Feedback Form");
 
-            try {
-                const response = await fetch("/api/feedback", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData)
-                });
+    if (!feedbackForm) {
+        console.error("Feedback form not found!");
+        return;
+    }
 
-                if (response.ok) {
-                    window.location.href = "/thankyou.html";
-                } else {
-                    const err = await response.json();
-                    alert(err.errors ? err.errors.join(", ") : err.error || "Failed to submit feedback");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to submit feedback");
-            }
+    // Rating button functionality
+    ratingBtns.forEach(btn => {
+        btn.addEventListener("click", function () {
+            ratingBtns.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            ratingInput.value = this.getAttribute("data-rating");
+            console.log("Rating set to:", ratingInput.value);
         });
     });
-    </script>
+
+    // Form submission
+    feedbackForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        console.log("Form submit triggered");
+
+        const formData = {
+            name: this.name.value.trim(),
+            email: this.email.value.trim(),
+            company: this.company.value.trim(),
+            message: this.message.value.trim(),
+            rating: this.rating.value || null
+        };
+
+        if (!formData.message) {
+            alert("Please enter your feedback.");
+            return;
+        }
+
+        console.log("Submitting feedback:", formData);
+
+        try {
+            const response = await fetch("/api/feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                console.log("Feedback submitted successfully");
+                window.location.href = "/thankyou.html";
+            } else {
+                const err = await response.json();
+                console.error("Server error:", err);
+                alert(err.errors ? err.errors.join(", ") : err.error || "Failed to submit feedback");
+            }
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+            alert("Failed to submit feedback due to network error");
+        }
+    });
+});
+</script>
+
 
 
 </body>
