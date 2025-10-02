@@ -36,6 +36,7 @@ async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       email TEXT,
+      company TEXT,
       message TEXT NOT NULL,
       rating INTEGER,
       metadata TEXT,
@@ -43,6 +44,7 @@ async function initDb() {
     );
   `;
   await dbRun(createTableSql);
+  console.log("SQLite DB initialized at:", DB_PATH);
 }
 
 initDb().catch(err => {
@@ -91,12 +93,16 @@ app.post('/api/feedback', async (req, res) => {
 
     const name = payload.name ? String(payload.name).trim() : null;
     const email = payload.email ? String(payload.email).trim() : null;
+    const company = payload.company ? String(payload.company).trim() : null;  // ✅ capture company
     const message = String(payload.message).trim();
     const rating = payload.rating !== undefined ? Number(payload.rating) : null;
     const metadata = payload.metadata ? JSON.stringify(payload.metadata) : null;
 
-    const insertSql = `INSERT INTO feedback (name, email, message, rating, metadata) VALUES (?, ?, ?, ?, ?)`;
-    await dbRun(insertSql, [name, email, message, rating, metadata]);
+    const insertSql = `
+      INSERT INTO feedback (name, email, company, message, rating, metadata)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    await dbRun(insertSql, [name, email, company, message, rating, metadata]);
 
     const row = await dbGet('SELECT last_insert_rowid() AS id');
     const insertedId = row ? row.id : null;
@@ -109,6 +115,7 @@ app.post('/api/feedback', async (req, res) => {
     res.status(500).json({ error: 'internal_server_error' });
   }
 });
+
 
 // List feedback
 app.get('/api/feedback', async (req, res) => {
