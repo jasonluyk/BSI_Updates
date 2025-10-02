@@ -571,7 +571,7 @@
         
         <div id="alertContainer"></div>
         
-        <form id="feedbackForm">
+        <form id="feedbackForm" novalidate>
             <div class="form-group">
                 <label for="name">Name (Optional)</label>
                 <input type="text" id="name" name="name" placeholder="Your name">
@@ -663,12 +663,11 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showAlert('Thank you for your feedback!', 'success');
-                    feedbackForm.reset();
-                    ratingBtns.forEach(b => b.classList.remove('active'));
+                    window.location.href = "/thankyou.html";
                 } else {
                     showAlert(data.error || 'Failed to submit feedback. Please try again.', 'error');
                 }
+
             } catch (error) {
                 console.error('Error:', error);
                 showAlert('Failed to submit feedback. Please check your connection and try again.', 'error');
