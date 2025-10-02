@@ -580,39 +580,27 @@
         <div id="alertContainer"></div>
         
         <form id="feedbackForm" novalidate>
-            <div class="form-group">
-                <label for="name">Name (Optional)</label>
-                <input type="text" id="name" name="name" placeholder="Your name">
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email (Optional)</label>
-                <input type="email" id="email" name="email" placeholder="your@email.com">
-            </div>
-            
-            <div class="form-group">
-                <label for="company">Company (Optional)</label>
-                <input type="text" id="company" name="company" placeholder="Your company">
-            </div>
-            
-            <div class="form-group">
-                <label for="rating">How would you rate your experience? (Optional)</label>
-                <div class="rating-group">
-                    <button type="button" class="rating-btn" data-rating="1">1</button>
-                    <button type="button" class="rating-btn" data-rating="2">2</button>
-                    <button type="button" class="rating-btn" data-rating="3">3</button>
-                    <button type="button" class="rating-btn" data-rating="4">4</button>
-                    <button type="button" class="rating-btn" data-rating="5">5</button>
-                </div>
-                <input type="hidden" id="rating" name="rating" value="">
-            </div>
-            
-            <div class="form-group">
-                <label for="message">Your Feedback *</label>
-                <textarea id="message" name="message" placeholder="Tell us what you think..." required></textarea>
-            </div>
-            
-            <button type="submit" class="submit-btn">Submit Feedback</button>
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name"><br><br>
+
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email"><br><br>
+
+            <label for="company">Company:</label><br>
+            <input type="text" id="company" name="company"><br><br>
+
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" required></textarea><br><br>
+
+            <label>Rating:</label><br>
+            <span class="rating-btn" data-rating="1">★</span>
+            <span class="rating-btn" data-rating="2">★</span>
+            <span class="rating-btn" data-rating="3">★</span>
+            <span class="rating-btn" data-rating="4">★</span>
+            <span class="rating-btn" data-rating="5">★</span>
+            <input type="hidden" id="rating" name="rating"><br><br>
+
+            <button type="submit">Submit Feedback</button>
         </form>
 
     </div>
@@ -622,52 +610,51 @@
     </div>
     
     <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // Rating buttons functionality
-    const ratingBtns = document.querySelectorAll('.rating-btn');
-    const ratingInput = document.getElementById('rating');
+    document.addEventListener("DOMContentLoaded", () => {
+        const ratingBtns = document.querySelectorAll('.rating-btn');
+        const ratingInput = document.getElementById('rating');
+        const feedbackForm = document.getElementById('feedbackForm');
 
-    ratingBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            ratingBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            ratingInput.value = this.getAttribute('data-rating');
+        ratingBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                ratingBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                ratingInput.value = this.getAttribute('data-rating');
+            });
+        });
+
+        feedbackForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: this.name.value,
+                email: this.email.value,
+                company: this.company.value,
+                message: this.message.value,
+                rating: this.rating.value || null
+            };
+
+            try {
+                const response = await fetch("/api/feedback", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    window.location.href = "/thankyou.html";
+                } else {
+                    const err = await response.json();
+                    alert(err.errors ? err.errors.join(", ") : err.error || "Failed to submit feedback");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to submit feedback");
+            }
         });
     });
+    </script>
 
-    // Form submission
-    const feedbackForm = document.getElementById("feedbackForm");
-    feedbackForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        const formData = {
-            name: this.name.value,
-            email: this.email.value,
-            company: this.company.value,
-            message: this.message.value,
-            rating: this.rating.value || null
-        };
-
-        try {
-            const response = await fetch("/api/feedback", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                window.location.href = "/thankyou.html";
-            } else {
-                const err = await response.json();
-                alert(err.error || "Failed to submit feedback");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Failed to submit feedback");
-        }
-    });
-});
-</script>
 
 </body>
 </html>
