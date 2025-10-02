@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BSI Brochures</title>
     <link rel="icon" href="bsilogo.png" type="image/png">
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>-->
     <style>
         * {
             margin: 0;
@@ -15,99 +14,109 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220, 53, 69, 0.3);
             overflow: hidden;
+            border: 2px solid #dc3545;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
             color: white;
-            padding: 40px 30px;
+            padding: 50px 40px;
             text-align: center;
+            position: relative;
+            border-bottom: 4px solid #dc3545;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+        }
+        
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(220, 53, 69, 0.5));
         }
         
         .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 36px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         
         .header p {
-            font-size: 16px;
+            font-size: 18px;
             opacity: 0.9;
+            color: #e0e0e0;
         }
         
-        .qr-section {
-            padding: 30px;
-            text-align: center;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .qr-section h2 {
-            font-size: 20px;
-            color: #333;
-            margin-bottom: 15px;
-        }
-        
-        #qrcode {
-            display: inline-block;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .accent-line {
+            width: 80px;
+            height: 4px;
+            background: #dc3545;
+            margin: 15px auto 0;
+            border-radius: 2px;
         }
         
         .pdf-list {
-            padding: 30px;
+            padding: 40px;
+            background: #ffffff;
         }
         
         .pdf-list h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-weight: 700;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #dc3545;
         }
         
         .pdf-item {
             display: flex;
             align-items: center;
-            padding: 15px;
-            margin-bottom: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 10px;
             transition: all 0.3s ease;
             text-decoration: none;
-            color: #333;
+            color: #1a1a1a;
+            border: 2px solid transparent;
         }
         
         .pdf-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #ffffff;
+            transform: translateX(8px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
         }
         
         .pdf-icon {
-            width: 40px;
-            height: 40px;
-            background: #dc3545;
-            border-radius: 6px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 12px;
-            margin-right: 15px;
+            font-size: 13px;
+            margin-right: 18px;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
         
         .pdf-info {
@@ -115,9 +124,10 @@
         }
         
         .pdf-title {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 4px;
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 5px;
+            color: #1a1a1a;
         }
         
         .pdf-description {
@@ -126,22 +136,223 @@
         }
         
         .arrow {
-            color: #667eea;
-            font-size: 20px;
+            color: #dc3545;
+            font-size: 24px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .pdf-item:hover .arrow {
+            transform: translateX(5px);
+        }
+
+        /* Feedback Form Styles */
+        .feedback-section {
+            max-width: 900px;
+            margin: 30px auto 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220, 53, 69, 0.3);
+            padding: 45px 40px;
+            border: 2px solid #dc3545;
+        }
+
+        .feedback-section h2 {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .feedback-section > p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .rating-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-weight: 700;
+            color: #666;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .rating-btn:hover {
+            border-color: #dc3545;
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .rating-btn.active {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            border-color: #dc3545;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            color: white;
+            padding: 16px 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+            background: #0a0a0a;
+            margin-top: 30px;
+        }
+
+        .footer a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 600px) {
+            .header {
+                padding: 35px 25px;
+            }
+
             .header h1 {
+                font-size: 28px;
+            }
+
+            .logo-container img {
+                max-width: 160px;
+            }
+            
+            .pdf-list {
+                padding: 30px 20px;
+            }
+
+            .pdf-list h2 {
                 font-size: 24px;
             }
             
             .pdf-item {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 15px;
             }
             
             .pdf-icon {
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+            }
+
+            .arrow {
+                align-self: flex-end;
+            }
+
+            .feedback-section {
+                padding: 30px 20px;
+            }
+
+            .feedback-section h2 {
+                font-size: 24px;
+            }
+
+            .rating-group {
+                gap: 8px;
+            }
+
+            .rating-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
             }
         }
     </style>
@@ -149,8 +360,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📄 BSI Brochure Library</h1>
-            <p>All Brumley South has to Offer in one Place!</p>
+            <div class="logo-container">
+                <img src="bsilogo.png" alt="BSI Logo">
+            </div>
+            <h1>BSI Brochure Library</h1>
+            <p>All Brumley South has to Offer in One Place!</p>
+            <div class="accent-line"></div>
         </div>
         
         <div class="pdf-list">
@@ -191,6 +406,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
+            
             <a href="/pdfs/SSL Field Laser Upgrade 8 25 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -226,6 +442,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
+            
             <a href="/pdfs/Dallas Key REV 8 2025.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -234,15 +451,6 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
-            
-            <!--<a href="277266-BSI Timing Gen Rev 82525.pdf" class="pdf-item" target="_blank">
-                <div class="pdf-icon">PDF</div>
-                <div class="pdf-info">
-                    <div class="pdf-title">277266 Timing Generator</div>
-                    <div class="pdf-description">6220 Timing Generator Replacement</div>
-                </div>
-                <div class="arrow">→</div>
-            </a>-->
             
             <a href="/pdfs/BSI Tencor Surfscan Mouse 8 2025.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
@@ -261,6 +469,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
+            
             <a href="/pdfs/BSI Tencor Surfscan Parts Contracts 9 15 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -279,15 +488,6 @@
                 <div class="arrow">→</div>
             </a>
             
-            <!--<a href="188859-BSI MDD Board Rev 8 25 25.pdf" class="pdf-item" target="_blank">
-                <div class="pdf-icon">PDF</div>
-                <div class="pdf-info">
-                    <div class="pdf-title">MDD Board</div>
-                    <div class="pdf-description">Motor Distribution/Driver Board Upgrade</div>
-                </div>
-                <div class="arrow">→</div>
-            </a>-->
-            
             <a href="/pdfs/BSI Argon Laser EOL 9 17 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -296,6 +496,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
+            
             <a href="/pdfs/BSI NEW Tencor Circuit Boards Rev 9 17 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -304,15 +505,6 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
-            
-            <!--<a href="277266-BSI Timing Gen Rev 82525.pdf" class="pdf-item" target="_blank">
-                <div class="pdf-icon">PDF</div>
-                <div class="pdf-info">
-                    <div class="pdf-title">277266 Timing Generator</div>
-                    <div class="pdf-description">6220 Timing Generator Replacement</div>
-                </div>
-                <div class="arrow">→</div>
-            </a>-->
             
             <a href="/pdfs/BSI Tencor 6100 Surfscan Ulitmate 9 17 25.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
@@ -331,14 +523,7 @@
                 </div>
                 <div class="arrow">→</div>
             </a>
-            <!--<a href="BSI Tencor Surfscan Refurbishment 9 17 25.pdf" class="pdf-item" target="_blank">
-                <div class="pdf-icon">PDF</div>
-                <div class="pdf-info">
-                    <div class="pdf-title">Surfscan Refurbishment</div>
-                    <div class="pdf-description">BSI 6xxx Surfscan Refurbishments</div>
-                </div>
-                <div class="arrow">→</div>
-            </a>-->
+            
             <a href="/pdfs/BSI Line Card Rev 10 2024.pdf" class="pdf-item" target="_blank">
                 <div class="pdf-icon">PDF</div>
                 <div class="pdf-info">
@@ -349,7 +534,120 @@
             </a>
         </div>
     </div>
+
+    <!-- Feedback Section -->
+    <div class="feedback-section">
+        <h2>💬 Send Us Your Feedback</h2>
+        <p>We'd love to hear from you! Let us know what you think.</p>
+        
+        <div id="alertContainer"></div>
+        
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label for="name">Name (Optional)</label>
+                <input type="text" id="name" name="name" placeholder="Your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email (Optional)</label>
+                <input type="email" id="email" name="email" placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Company (Optional)</label>
+                <input type="text" id="company" name="company" placeholder="Your company">
+            </div>
+            
+            <div class="form-group">
+                <label for="rating">How would you rate your experience? (Optional)</label>
+                <div class="rating-group">
+                    <button type="button" class="rating-btn" data-rating="1">1</button>
+                    <button type="button" class="rating-btn" data-rating="2">2</button>
+                    <button type="button" class="rating-btn" data-rating="3">3</button>
+                    <button type="button" class="rating-btn" data-rating="4">4</button>
+                    <button type="button" class="rating-btn" data-rating="5">5</button>
+                </div>
+                <input type="hidden" id="rating" name="rating" value="">
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Your Feedback *</label>
+                <textarea id="message" name="message" placeholder="Tell us what you think..." required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">Submit Feedback</button>
+        </form>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Brumley South, Inc. All rights reserved.</p>
+    </div>
     
-    
+    <script>
+        // Rating buttons functionality
+        const ratingBtns = document.querySelectorAll('.rating-btn');
+        const ratingInput = document.getElementById('rating');
+        
+        ratingBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                ratingBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                ratingInput.value = this.getAttribute('data-rating');
+            });
+        });
+
+        // Form submission
+        const feedbackForm = document.getElementById('feedbackForm');
+        const alertContainer = document.getElementById('alertContainer');
+        
+        function showAlert(message, type) {
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+        
+        feedbackForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                company: document.getElementById('company').value,
+                message: document.getElementById('message').value,
+                rating: document.getElementById('rating').value || null
+            };
+            
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Thank you for your feedback!', 'success');
+                    feedbackForm.reset();
+                    ratingBtns.forEach(b => b.classList.remove('active'));
+                } else {
+                    showAlert(data.error || 'Failed to submit feedback. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Failed to submit feedback. Please check your connection and try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Feedback';
+            }
+        });
+    </script>
 </body>
 </html>
