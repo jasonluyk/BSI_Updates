@@ -579,7 +579,7 @@
         
         <div id="alertContainer"></div>
         
-        <form id="feedbackForm" novalidate onsubmit="submitFeedback(event)">
+        <form id="feedbackForm" novalidate>
             <div class="form-group">
                 <label for="name">Name (Optional)</label>
                 <input type="text" id="name" name="name" placeholder="Your name">
@@ -635,37 +635,7 @@
         });
 
         // Form submission
-        async function submitFeedback(event) {
-        event.preventDefault(); // Prevent default form submission
 
-        const form = document.getElementById("feedbackForm");
-
-        const formData = {
-            name: form.name.value,
-            email: form.email.value,
-            company: form.company.value,
-            message: form.message.value,
-            rating: form.rating.value || null
-        };
-
-        try {
-            const response = await fetch("/api/feedback", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                window.location.href = "/thankyou.html"; // Redirect on success
-            } else {
-                const err = await response.json();
-                alert(err.error || "Failed to submit feedback");
-            }
-        } catch (error) {
-            console.error("Error submitting feedback:", error);
-            alert("Failed to submit feedback");
-        }
-        }
 
 
 
