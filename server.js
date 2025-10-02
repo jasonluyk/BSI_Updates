@@ -9,7 +9,8 @@ const morgan = require("morgan");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
-const DB_PATH = path.join(__dirname, "feedback.db");
+const DB_PATH = path.join("/opt/feedback-api", "feedback.db");
+
 
 const app = express();
 
