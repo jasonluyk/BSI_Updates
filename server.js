@@ -1,25 +1,20 @@
 require("dotenv").config();
 const express = require("express");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const bodyParser = require("body-parser");
+const { MongoClient } = require("mongodb");
 const path = require("path");
-require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public"))); // your HTML, CSS, JS files
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public"))); // your HTML, CSS, JS
 
-// MongoDB Setup
-const uri = process.env.MONGO_URI; // store MongoDB URI in environment variable
+// MongoDB Atlas setup
+const uri = process.env.MONGO_URI; // stored in App Platform environment variables
 const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true
-    }
+    serverApi: { version: "1" },
 });
 
 let collection;
@@ -27,47 +22,51 @@ let collection;
 async function connectDB() {
     try {
         await client.connect();
-        const db = client.db("feedback"); // your database name
-        collection = db.collection("BSI"); // your collection name
-        console.log("Connected to MongoDB Atlas");
+        collection = client.db("feedback").collection("BSI");
+        console.log("✅ Connected to MongoDB Atlas");
     } catch (err) {
-        console.error("MongoDB connection error:", err);
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1);
     }
 }
+
 connectDB();
 
-// API Routes
+// Routes
 
-// Submit feedback
-app.post("/api/feedback", async (req, res) => {
+// Get all feedback for admin
+app.get("/api/admin/feedback", async (req, res) => {
     try {
-        const { name, email, company, message, rating } = req.body;
-        if (!message) return res.status(400).json({ error: "Message is required" });
-
-        const feedback = {
-            name: name || null,
-            email: email || null,
-            company: company || null,
-            message,
-            rating: rating ? Number(rating) : null,
-            created_at: new Date()
-        };
-
-        const result = await collection.insertOne(feedback);
-        res.json({ success: true, id: result.insertedId });
+        const feedback = await collection.find({}).sort({ created_at: -1 }).toArray();
+        res.json(feedback);
     } catch (err) {
-        console.error("POST /api/feedback error:", err);
+        console.error("GET /api/admin/feedback error:", err);
         res.status(500).json({ error: "internal_server_error" });
     }
 });
 
-// Get all feedback (admin)
-app.get("/api/admin/feedback", async (req, res) => {
+// Post new feedback
+app.post("/api/feedback", async (req, res) => {
     try {
-        const feedbackList = await collection.find({}).sort({ created_at: -1 }).toArray();
-        res.json(feedbackList);
+        const { name, email, company, message, rating } = req.body;
+
+        if (!message || typeof message !== "string" || message.trim() === "") {
+            return res.status(400).json({ error: "message_required" });
+        }
+
+        const newFeedback = {
+            name: name || null,
+            email: email || null,
+            company: company || null,
+            message: message.trim(),
+            rating: rating ? Number(rating) : null,
+            created_at: new Date(),
+        };
+
+        await collection.insertOne(newFeedback);
+        res.status(201).json({ success: true });
     } catch (err) {
-        console.error("GET /api/admin/feedback error:", err);
+        console.error("POST /api/feedback error:", err);
         res.status(500).json({ error: "internal_server_error" });
     }
 });
@@ -75,11 +74,18 @@ app.get("/api/admin/feedback", async (req, res) => {
 // Delete feedback
 app.delete("/api/admin/feedback/:id", async (req, res) => {
     try {
-        const id = req.params.id;
-        if (!ObjectId.isValid(id)) return res.status(400).json({ error: "invalid_id" });
+        const { id } = req.params;
+        const ObjectId = require("mongodb").ObjectId;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ error: "invalid_id" });
+        }
 
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
-        if (result.deletedCount === 0) return res.status(404).json({ error: "not_found" });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "feedback_not_found" });
+        }
 
         res.json({ success: true });
     } catch (err) {
@@ -88,9 +94,11 @@ app.delete("/api/admin/feedback/:id", async (req, res) => {
     }
 });
 
-// Serve HTML files
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
-app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
-app.get("/thankyou.html", (req, res) => res.sendFile(path.join(__dirname, "public", "thankyou.html")));
+// Fallback route
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-app.listen(PORT, () => console.log(`Server listening on http://0.0.0.0:${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🚀 Server listening on http://0.0.0.0:${PORT}`);
+});

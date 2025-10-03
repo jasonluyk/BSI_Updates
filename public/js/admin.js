@@ -77,6 +77,29 @@ function createFeedbackCard(feedback) {
     `;
 }
 
+async function deleteFeedback(id) {
+    if (!confirm('Are you sure you want to delete this feedback?')) return;
+
+    try {
+        const response = await fetch(`/api/admin/feedback/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            loadFeedback();
+        } else {
+            const err = await response.json();
+            alert(err.error || 'Failed to delete feedback');
+        }
+    } catch (error) {
+        console.error('Error deleting feedback:', error);
+        alert('Failed to delete feedback');
+    }
+}
+
+
+
+
 function createStars(rating) {
     let stars = '';
     for (let i = 1; i <= 5; i++) {
@@ -89,27 +112,6 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-}
-
-async function deleteFeedback(id) {
-    if (!confirm('Are you sure you want to delete this feedback?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/admin/feedback/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            loadFeedback();
-        } else {
-            alert('Failed to delete feedback');
-        }
-    } catch (error) {
-        console.error('Error deleting feedback:', error);
-        alert('Failed to delete feedback');
-    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
