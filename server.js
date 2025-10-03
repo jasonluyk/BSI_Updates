@@ -95,7 +95,7 @@ app.delete("/api/admin/feedback/:id", async (req, res) => {
 });
 
 // Fallback route
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
