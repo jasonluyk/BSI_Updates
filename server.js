@@ -50,21 +50,21 @@ app.post("/api/feedback", async (req, res) => {
     try {
         const { name, email, company, message, rating } = req.body;
 
-        if (!message || typeof message !== "string" || message.trim() === "") {
-            return res.status(400).json({ error: "message_required" });
+        if (!message) {
+            return res.status(400).json({ error: "Message is required" });
         }
 
-        const newFeedback = {
-            name: name || null,
-            email: email || null,
-            company: company || null,
-            message: message.trim(),
+        const collection = await connectDB();
+        const result = await collection.insertOne({
+            name,
+            email,
+            company,
+            message,
             rating: rating ? Number(rating) : null,
-            created_at: new Date(),
-        };
+            created_at: new Date()
+        });
 
-        await collection.insertOne(newFeedback);
-        res.status(201).json({ success: true });
+        res.status(201).json({ success: true, id: result.insertedId });
     } catch (err) {
         console.error("POST /api/feedback error:", err);
         res.status(500).json({ error: "internal_server_error" });
