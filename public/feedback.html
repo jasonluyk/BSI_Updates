@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - BSI</title>
+    <link rel="icon" href="bsilogo.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+        }
+
+        .feedback-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220, 53, 69, 0.3);
+            overflow: hidden;
+            border: 2px solid #dc3545;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            border-bottom: 4px solid #dc3545;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 180px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(220, 53, 69, 0.5));
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            color: #e0e0e0;
+        }
+
+        .accent-line {
+            width: 80px;
+            height: 4px;
+            background: #dc3545;
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        .feedback-section {
+            padding: 45px 40px;
+        }
+
+        .feedback-section h2 {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .feedback-section > p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .rating-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-weight: 700;
+            color: #666;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .rating-btn:hover {
+            border-color: #dc3545;
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .rating-btn.active {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            border-color: #dc3545;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            color: white;
+            padding: 16px 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+            background: #0a0a0a;
+            margin-top: 30px;
+        }
+
+        .footer a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 35px 25px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .logo-container img {
+                max-width: 150px;
+            }
+
+            .feedback-section {
+                padding: 30px 20px;
+            }
+
+            .feedback-section h2 {
+                font-size: 24px;
+            }
+
+            .rating-group {
+                gap: 8px;
+            }
+
+            .rating-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 700px; margin: 0 auto;">
+        <a href="/" class="back-btn">← Back to Brochures</a>
+    </div>
+
+    <div class="feedback-container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="bsilogo.png" alt="BSI Logo">
+            </div>
+            <h1>We Want to Hear From You</h1>
+            <p>Your feedback helps us improve</p>
+            <div class="accent-line"></div>
+        </div>
+
+        <div class="feedback-section">
+            <h2>Leave Feedback or Ask Questions</h2>
+            <p>Have a question about our products or services? Want to share your experience? We're here to help!</p>
+            
+            <div id="alertContainer"></div>
+            
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="name">Name (Optional)</label>
+                    <input type="text" id="name" name="name" placeholder="Your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email (Optional)</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="company">Company (Optional)</label>
+                    <input type="text" id="company" name="company" placeholder="Your company">
+                </div>
+                
+                <div class="form-group">
+                    <label for="rating">Rate Your Experience (Optional)</label>
+                    <div class="rating-group">
+                        <button type="button" class="rating-btn" data-rating="1">1</button>
+                        <button type="button" class="rating-btn" data-rating="2">2</button>
+                        <button type="button" class="rating-btn" data-rating="3">3</button>
+                        <button type="button" class="rating-btn" data-rating="4">4</button>
+                        <button type="button" class="rating-btn" data-rating="5">5</button>
+                    </div>
+                    <input type="hidden" id="rating" name="rating" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Your Message *</label>
+                    <textarea id="message" name="message" placeholder="Share your feedback or ask a question..." required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Brumley South, Inc. All rights reserved.</p>
+    </div>
+    
+    <script src="/js/feedback.js">
+       
+    </script>
+</body>
+</html>
