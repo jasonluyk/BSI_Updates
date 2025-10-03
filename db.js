@@ -1,26 +1,36 @@
-require("dotenv").config();
+// db.js
 const { MongoClient } = require("mongodb");
+require("dotenv").config();
 
 const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
 
-let collection;
-
-async function connectDB() {
-    if (!collection) {
-        try {
-            await client.connect();
-            console.log("✅ Connected to MongoDB Atlas");
-            const db = client.db("feedback"); // Database name
-            collection = db.collection("BSI"); // Collection name
-        } catch (err) {
-            console.error("❌ MongoDB connection failed:", err);
-        }
-    }
-    return collection;
+if (!uri) {
+    console.error("❌ MONGO_URI is missing in .env");
+    process.exit(1);
 }
 
-module.exports = { connectDB };
+const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+
+let db;
+
+async function connectDB() {
+    try {
+        await client.connect();
+        console.log("✅ Connected to MongoDB Atlas");
+        db = client.db("feedback"); // <-- your DB name
+    } catch (err) {
+        console.error("❌ MongoDB connection error:", err);
+    }
+}
+
+function getDB() {
+    if (!db) {
+        throw new Error("Database not initialized");
+    }
+    return db;
+}
+
+module.exports = { connectDB, getDB };
