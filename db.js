@@ -18,7 +18,7 @@ async function connectDB() {
   });
 
   await client.connect();
-  db = client.db("feedback_db"); // Database name in MongoDB Atlas
+  db = client.db("feedback"); // Database name in MongoDB Atlas
   console.log("Connected to MongoDB Atlas");
 
   return db;

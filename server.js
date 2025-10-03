@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/feedback", async (req, res) => {
   try {
     const db = await connectDB();
-    const feedbackCollection = db.collection("feedback");
+    const feedbackCollection = db.collection("BSI");
 
     const payload = req.body;
 
@@ -49,7 +49,7 @@ app.post("/api/feedback", async (req, res) => {
 app.get("/api/admin/feedback", async (req, res) => {
   try {
     const db = await connectDB();
-    const feedbackCollection = db.collection("feedback");
+    const feedbackCollection = db.collection("BSI");
 
     const feedback = await feedbackCollection.find({}).sort({ created_at: -1 }).toArray();
     res.json(feedback);
@@ -65,7 +65,7 @@ app.get("/api/admin/feedback", async (req, res) => {
 app.delete("/api/admin/feedback/:id", async (req, res) => {
   try {
     const db = await connectDB();
-    const feedbackCollection = db.collection("feedback");
+    const feedbackCollection = db.collection("BSI");
 
     const id = req.params.id;
     if (!ObjectId.isValid(id)) {
