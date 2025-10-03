@@ -1,5 +1,37 @@
 let allFeedback = [];
         
+
+                // Check authentication before loading
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    window.location.href = '/login';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                window.location.href = '/login';
+                return false;
+            }
+        }
+
+        // Add logout functionality
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        // Check auth on page load
+        checkAuth().then(authenticated => {
+            if (authenticated) {
+                loadFeedback();
+            }
+        });
+
+
         async function loadFeedback() {
             const container = document.getElementById('feedbackContainer');
             container.innerHTML = '<div class="loading">Loading feedback...</div>';

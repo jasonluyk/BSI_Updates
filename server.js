@@ -1,6 +1,8 @@
 // server.js
 require("dotenv").config();
 const express = require("express");
+const session = require("express-session");
+const bcrypt = require("bcrypt");
 const path = require("path");
 const { ObjectId } = require("mongodb");
 const connectDB = require("./db");
@@ -8,14 +10,36 @@ const connectDB = require("./db");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Trust proxy for Digital Ocean App Platform
 app.set('trust proxy', 1);
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
+  }
+}));
+
+// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Health check endpoint
+// Auth middleware
+function requireAuth(req, res, next) {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  res.status(401).json({ error: "Unauthorized" });
+}
+
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({ 
     status: "ok", 
@@ -24,32 +48,60 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Test DB connection endpoint
-app.get("/api/test-db", async (req, res) => {
+// Login endpoint
+app.post("/api/login", async (req, res) => {
   try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
     const db = await connectDB();
-    const collections = await db.listCollections().toArray();
-    res.json({ 
-      success: true, 
-      message: "MongoDB connected",
-      database: "feedback",
-      collections: collections.map(c => c.name)
-    });
+    const users = db.collection("users");
+    
+    const user = await users.findOne({ username });
+    
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    
+    if (!validPassword) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    req.session.userId = user._id;
+    req.session.username = user.username;
+    
+    res.json({ success: true, message: "Logged in successfully" });
   } catch (err) {
-    console.error("❌ DB Test Error:", err);
-    res.status(500).json({ 
-      success: false, 
-      error: err.message 
-    });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Login failed" });
   }
 });
 
-// ✅ Create feedback
+// Logout endpoint
+app.post("/api/logout", (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
+
+// Check auth status
+app.get("/api/auth/check", (req, res) => {
+  if (req.session && req.session.userId) {
+    res.json({ authenticated: true, username: req.session.username });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
+// Create feedback (public)
 app.post("/api/feedback", async (req, res) => {
   try {
     const { name, email, company, message, rating } = req.body;
     
-    // Validation
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
@@ -75,13 +127,13 @@ app.post("/api/feedback", async (req, res) => {
       message: "Feedback submitted successfully"
     });
   } catch (err) {
-    console.error("❌ Error inserting feedback:", err);
-    res.status(500).json({ error: "Failed to save feedback. Please try again." });
+    console.error("Error inserting feedback:", err);
+    res.status(500).json({ error: "Failed to save feedback" });
   }
 });
 
-// ✅ Get all feedback
-app.get("/api/feedback", async (req, res) => {
+// Get all feedback (protected)
+app.get("/api/feedback", requireAuth, async (req, res) => {
   try {
     const db = await connectDB();
     const feedback = db.collection("BSI");
@@ -91,18 +143,16 @@ app.get("/api/feedback", async (req, res) => {
       .sort({ createdAt: -1 })
       .toArray();
     
-    console.log(`📊 Fetched ${items.length} feedback items`);
     res.json(items);
   } catch (err) {
-    console.error("❌ Error fetching feedback:", err);
+    console.error("Error fetching feedback:", err);
     res.status(500).json({ error: "Failed to fetch feedback" });
   }
 });
 
-// ✅ Delete feedback
-app.delete("/api/feedback/:id", async (req, res) => {
+// Delete feedback (protected)
+app.delete("/api/feedback/:id", requireAuth, async (req, res) => {
   try {
-    // Validate ObjectId
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid feedback ID" });
     }
@@ -118,10 +168,9 @@ app.delete("/api/feedback/:id", async (req, res) => {
       return res.status(404).json({ error: "Feedback not found" });
     }
 
-    console.log(`🗑️ Deleted feedback: ${req.params.id}`);
-    res.json({ success: true, message: "Feedback deleted successfully" });
+    res.json({ success: true });
   } catch (err) {
-    console.error("❌ Error deleting feedback:", err);
+    console.error("Error deleting feedback:", err);
     res.status(500).json({ error: "Failed to delete feedback" });
   }
 });
@@ -131,6 +180,12 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Serve login page
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+// Serve admin page (will check auth client-side)
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
@@ -140,27 +195,11 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("❌ Server Error:", err);
-  res.status(500).json({ 
-    error: "Internal server error",
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
 // Start server
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 Access at: http://localhost:${PORT}`);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
-    process.exit(0);
-  });
+  server.close(() => process.exit(0));
 });
