@@ -1,6 +1,5 @@
 let allFeedback = [];
 
-// Load all feedback
 async function loadFeedback() {
     const container = document.getElementById('feedbackContainer');
     container.innerHTML = '<div class="loading">Loading feedback...</div>';
@@ -18,24 +17,22 @@ async function loadFeedback() {
     }
 }
 
-// Update dashboard stats
 function updateStats() {
     document.getElementById('totalCount').textContent = allFeedback.length;
 
-    const ratingsOnly = allFeedback.filter(f => f.rating).map(f => f.rating);
-    const avgRating = ratingsOnly.length > 0
+    const ratingsOnly = allFeedback.filter(f => f.rating).map(f => Number(f.rating));
+    const avgRating = ratingsOnly.length > 0 
         ? (ratingsOnly.reduce((a, b) => a + b, 0) / ratingsOnly.length).toFixed(1)
         : '-';
     document.getElementById('avgRating').textContent = avgRating;
 
     const today = new Date().toDateString();
-    const todayCount = allFeedback.filter(f =>
+    const todayCount = allFeedback.filter(f => 
         new Date(f.created_at).toDateString() === today
     ).length;
     document.getElementById('todayCount').textContent = todayCount;
 }
 
-// Display feedback cards
 function displayFeedback(feedbackList) {
     const container = document.getElementById('feedbackContainer');
 
@@ -44,25 +41,16 @@ function displayFeedback(feedbackList) {
         return;
     }
 
-    container.innerHTML = '<div class="feedback-grid">' +
-        feedbackList.map(feedback => createFeedbackCard(feedback)).join('') +
+    container.innerHTML = '<div class="feedback-grid">' + 
+        feedbackList.map(feedback => createFeedbackCard(feedback)).join('') + 
         '</div>';
-
-    // Attach delete events
-    document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.closest(".feedback-card").dataset.id;
-            deleteFeedback(id);
-        });
-    });
 }
 
-// Create a feedback card HTML
 function createFeedbackCard(feedback) {
     const date = new Date(feedback.created_at);
     const formattedDate = date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
 
-    const ratingHTML = feedback.rating
+    const ratingHTML = feedback.rating 
         ? `<div class="feedback-rating">${createStars(feedback.rating)}</div>`
         : '';
 
@@ -71,7 +59,7 @@ function createFeedbackCard(feedback) {
     const companyDisplay = feedback.company ? `<div class="feedback-contact">🏢 ${feedback.company}</div>` : '';
 
     return `
-        <div class="feedback-card" data-id="${feedback.id}">
+        <div class="feedback-card" data-id="${feedback._id}">
             <div class="feedback-header">
                 <div class="feedback-meta">
                     <div class="feedback-name">${nameDisplay}</div>
@@ -83,13 +71,12 @@ function createFeedbackCard(feedback) {
             ${ratingHTML}
             <div class="feedback-message">${escapeHtml(feedback.message)}</div>
             <div class="feedback-actions">
-                <button class="delete-btn">🗑️ Delete</button>
+                <button class="delete-btn" data-id="${feedback._id}">🗑️ Delete</button>
             </div>
         </div>
     `;
 }
 
-// Create star rating HTML
 function createStars(rating) {
     let stars = '';
     for (let i = 1; i <= 5; i++) {
@@ -98,16 +85,16 @@ function createStars(rating) {
     return stars;
 }
 
-// Escape HTML for safety
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Delete feedback by ID
 async function deleteFeedback(id) {
-    if (!confirm('Are you sure you want to delete this feedback?')) return;
+    if (!confirm('Are you sure you want to delete this feedback?')) {
+        return;
+    }
 
     try {
         const response = await fetch(`/api/admin/feedback/${id}`, {
@@ -125,29 +112,27 @@ async function deleteFeedback(id) {
     }
 }
 
-// Filter feedback by rating
-document.getElementById('ratingFilter').addEventListener('change', function () {
-    const filterValue = this.value;
-
-    let filteredFeedback = allFeedback;
-
-    if (filterValue !== 'all') {
-        if (filterValue === 'null') {
-            filteredFeedback = allFeedback.filter(f => !f.rating);
-        } else {
-            filteredFeedback = allFeedback.filter(f => f.rating == filterValue);
-        }
-    }
-
-    displayFeedback(filteredFeedback);
-});
-
-// Attach refresh button event without inline onclick
 document.addEventListener("DOMContentLoaded", () => {
-    const refreshBtn = document.querySelector(".refresh-btn");
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", loadFeedback);
-    }
+    document.getElementById('feedbackContainer').addEventListener("click", e => {
+        if (e.target.classList.contains("delete-btn")) {
+            const id = e.target.getAttribute("data-id");
+            deleteFeedback(id);
+        }
+    });
+
+    document.getElementById('ratingFilter').addEventListener('change', function() {
+        const filterValue = this.value;
+
+        let filteredFeedback = allFeedback;
+        if (filterValue !== 'all') {
+            if (filterValue === 'null') {
+                filteredFeedback = allFeedback.filter(f => !f.rating);
+            } else {
+                filteredFeedback = allFeedback.filter(f => f.rating == filterValue);
+            }
+        }
+        displayFeedback(filteredFeedback);
+    });
 
     loadFeedback();
     setInterval(loadFeedback, 30000);
