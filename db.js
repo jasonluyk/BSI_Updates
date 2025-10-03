@@ -1,27 +1,26 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+require("dotenv").config();
+const { MongoClient } = require("mongodb");
 
-let client;
-let db;
+const uri = process.env.MONGO_URI;
+const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+let collection;
 
 async function connectDB() {
-  if (db) return db;
-
-  const uri = process.env.MONGO_URI;
-  if (!uri) throw new Error("Missing MONGO_URI environment variable");
-
-  client = new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
+    if (!collection) {
+        try {
+            await client.connect();
+            console.log("✅ Connected to MongoDB Atlas");
+            const db = client.db("feedback"); // Database name
+            collection = db.collection("BSI"); // Collection name
+        } catch (err) {
+            console.error("❌ MongoDB connection failed:", err);
+        }
     }
-  });
-
-  await client.connect();
-  db = client.db("feedback"); // Database name in MongoDB Atlas
-  console.log("Connected to MongoDB Atlas");
-
-  return db;
+    return collection;
 }
 
-module.exports = connectDB;
+module.exports = { connectDB };
