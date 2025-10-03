@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
 
         const formData = {
-            name: this.name.value,
-            email: this.email.value,
-            company: this.company.value,
-            message: this.message.value,
+            name: this.name.value.trim() || null,
+            email: this.email.value.trim() || null,
+            company: this.company.value.trim() || null,
+            message: this.message.value.trim(),
             rating: this.rating.value || null
         };
 
